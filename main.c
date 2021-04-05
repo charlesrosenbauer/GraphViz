@@ -31,6 +31,24 @@ float rflt(){
 }
 
 
+void drawLine(uint32_t* ps, int x0, int y0, int x1, int y1){
+	float dx = x0 - x1;
+	float dy = y0 - y1;
+	float  m = dy / dx;
+	
+	float carry = 0;
+	if((m * m) < 1.0){
+		for(int i = 0; i < dx; i++){
+		
+		}
+	}else{
+		for(int i = 0; i < dy; i++){
+		
+		}
+	}
+}
+
+
 int main(){
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
