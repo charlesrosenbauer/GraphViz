@@ -1,5 +1,5 @@
 #include "SDL/SDL.h"
-
+#include "defs.h"
 
 
 
