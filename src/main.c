@@ -25,45 +25,7 @@ void move(Vec4* vs, int vct, float scale){
 } 
 
 
-void drawLine(uint32_t* ps, int x0, int y0, int x1, int y1){
-	float dx = x0 - x1;
-	float dy = y0 - y1;
-	float  m = dy / dx;
-	
-	if(dx < 0){
-		dx      = -dx;
-		int tmp =  x0;
-		x0      =  x1;
-		x1      =  tmp;
-	}
-	if(dy < 0){
-		dy      = -dy;
-		int tmp =  y0;
-		y0      =  y1;
-		y1      =  tmp;
-	}
-	
-	//printf("%f %f : %f\n", dx, dy, m);
-	
-	float carry = 0;
-	if((m * m) < 1.0){
-		for(int i = 0; i < dx; i++){
-			int x =  x1 + i;
-			int y =  y1 + carry;
-			int p = (y * 512) + x;
-			carry += m;
-			ps[p] = 0xffffffff;
-		}
-	}else{
-		for(int i = 0; i < dy; i++){
-			int x =  x1 + carry;
-			int y =  y1 + i;
-			int p = (y * 512) + x;
-			carry += m;
-			ps[p] = 0xffffffff;
-		}
-	}
-}
+
 
 
 
@@ -76,27 +38,38 @@ int main(int argc, char** argv){
 	
 	SDL_Surface* screen = SDL_SetVideoMode(512, 512, 32, 0);
 
+
+	int vct  = -1;
+	Node* ns = parse(argv[1], &vct);
+	printf("VERTS=%i\n", vct);
+	for(int i = 0; i < vct; i++){
+		printf("%i | ", i);
+		for(int j = 0; j < ns[i].edgect; j++) printf("%i ", ns[i].edges[j]);
+		printf("\n");
+	}
 		
-	Vec4* vs = malloc(sizeof(Vec4) * 2048);
-	for(int i = 0; i < 2048; i++){
+	Vec4* vs = malloc(sizeof(Vec4) * vct);
+	for(int i = 0; i < vct; i++){
 		vs[i].w = 0.0;
 		vs[i].x = rflt();
 		vs[i].y = rflt();
 		vs[i].z = rflt();
 	}
 	
-	normalize(vs, 2048);
+	normalize(vs, vct);
 	
-	
-	//int vct  = -1;
-	//Node* ns = parse(argv[1], &vct);
+	int* xs = malloc(sizeof(int) * vct);
+	int* ys = malloc(sizeof(int) * vct);
 	
 	int cont = 1;
 	while(cont){
 		SDL_FillRect(screen, 0, 0);
 		
-		drawVecs(screen->pixels, vs, 2048);
-		move(vs, 2048, 0.01);
+		move(vs, vct, 0.02);
+		normalize(vs, vct);
+		//drawVecs(screen->pixels, vs, vct);
+		
+		drawGraph(screen->pixels, vs, xs, ys, ns, vct, 0);
 		
 		//drawLine(screen->pixels, 0, 0, 511, 255);
 		

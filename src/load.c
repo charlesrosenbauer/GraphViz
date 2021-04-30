@@ -111,13 +111,12 @@ Node* parse(char* fname, int* vct){
 					last   = ix;
 					int v  = parseInt(buffer, &j, end);
 					if(v == 0) continue;
-					ret[n-1].edges[edgeix] = v;
+					ret[n].edges[edgeix] = v;
 					edgeix++;
 					skipWhite(buffer, &j, end);
 				}
-				for(int k = 0; k < edgeix; k++) printf("%i ", ret[n-1].edges[k]);
-				printf("\n");
-				ret[n-1].edgect = edgeix;
+				for(int j = 0; j < edgeix; j++) ret[n].edges[j]--;
+				ret[n].edgect = edgeix;
 				
 				
 			}else{
@@ -138,9 +137,7 @@ Node* parse(char* fname, int* vct){
 				int end = (i+1 >= lnct)? fsize : ixs[i+1];
 				skipWhite(buffer, &ix, end);
 				int n   = parseInt(buffer, &ix, end);
-				printf("VERTS=%i\n", n);
-				
-				ret = malloc(sizeof(Node) * n);
+				ret = malloc(sizeof(Node) * (n+1));
 				*vct = n;
 			}
 		}
@@ -148,6 +145,6 @@ Node* parse(char* fname, int* vct){
 	
 	free(buffer);
 	free(ixs);
-	return NULL;
+	return &ret[1];
 }
 

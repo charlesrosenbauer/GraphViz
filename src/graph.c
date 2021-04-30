@@ -115,3 +115,58 @@ void normalize(Vec4* vs, int ct){
 		vs[i] = scaleV4(subV4(vs[i], center), scale);
 }
 
+
+
+
+void drawLine(uint32_t* ps, int x0, int y0, int x1, int y1){
+	int dx, dy;
+	int temp, x, y;
+	dx = x1 - x0;
+	dy = y1 - y0;
+	x = x0;
+	y = y0;
+	temp = 2 * dy - dx;
+	while(x < x1){
+		if(temp < 0){
+			temp = temp + 2 * dy;
+		}else{
+			y = y + 1;
+			temp = temp + 2 * dy - 2 * dx;
+		}
+		int p = (y * 512) + x;
+		x++;
+		if((x < 0) || (x > 511)) continue;
+		if((y < 0) || (y > 511)) continue;
+		ps[p] = 0xffffff;
+	}
+}
+
+
+void drawGraph(uint32_t* ps, Vec4* vs, int* xs, int* ys, Node* ns, int ct, int isDirected){
+	float zpos = 1.5;
+	// Project the points. Maybe this should be in a different function
+	for(int i = 0; i < ct; i++){
+		int x = ((vs[i].x / (vs[i].z - zpos)) * 256) + 256;
+		int y = ((vs[i].y / (vs[i].z - zpos)) * 256) + 256;
+		xs[i] = x;
+		ys[i] = y;
+	}
+	
+	for(int i = 0; i < ct; i++){
+		int x = xs[i];
+		int y = ys[i];
+		for(int j  = 0; j < ns[i].edgect; j++){
+			int v  = ns[i].edges[j];
+			//if(!isDirected && (v <= i)) continue;
+			int x_ = xs[v];
+			int y_ = ys[v];
+			//printf("L%i %i %i %i\n", x_, y_, x, y);
+			drawLine(ps, x, y, x_, y_);
+		}
+	}
+	//printf("\n");
+}
+
+
+
+
