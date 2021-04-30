@@ -25,6 +25,28 @@ void loadFile(char* fname, uint8_t** buffer, int* fsize){
 }
 
 
+void skipWhite(uint8_t* buffer, int* ix, int end){
+	for(int i = *ix; i < end; i++){
+		char c = buffer[i];
+		if((c != ' ') || (c != '\t')) break;
+		*ix = i;
+	}
+}
+
+
+int parseInt(uint8_t* buffer, int* ix, int end){
+	int n = 0;
+	for(int i = *ix; i < end; i++){
+		char c = buffer[i];
+		if((c > '9') || (c < '0')) break;
+		n *= 10;
+		n += (c - '0');
+		*ix = i;
+	}
+	return n;
+}
+
+
 Node* parse(char* fname, int* vct){
 	uint8_t* buffer = NULL;
 	int      fsize  = 0;
@@ -55,14 +77,46 @@ Node* parse(char* fname, int* vct){
 		}
 	}
 	
+	Node* ret;
+	
 	{// Parse files
-		*vct = -1;
+		*vct    = -1;
 		for(int i = 0; i < lnct; i++){
 			if(buffer[ixs[i]] ==  '\n') continue;	// Newline, skip
 			if(buffer[ixs[i]] ==  '#' ) continue;	// comment, skip
 			if(ixs[i]         == fsize) continue;	// EOF
 			if(*vct != -1){
-			
+				if(0){
+					failLine:
+						printf("Invalid vertex format at line %i\n", i+1);
+						free(buffer);
+						free(ixs);
+						return NULL;
+				}
+				int ix   = ixs[i];
+				int init = ix;
+				int end  = (i+1 >= lnct)? fsize : ixs[i+1];
+				int n    = parseInt(buffer, &ix, end);
+				if (n ==    0) goto failLine;
+				if (n >= *vct) goto failLine;
+				skipWhite(buffer, &ix, end);
+				if(buffer[ix+2] != ':') goto failLine;
+				ix += 1;
+				skipWhite(buffer, &ix, end);
+				int last = ix-1;
+				ret[n].edges = malloc(sizeof(int) * ((end-ix) / 2));
+				
+				int edgeix = 0;
+				for(int j  = ix; j < end; j++){
+					last   = ix;
+					ret[n].edges[edgeix] = parseInt(buffer, &j, end);
+					printf("%i\n", ret[n].edges[edgeix]);
+					edgeix++;
+					skipWhite(buffer, &j, end);
+				}
+				ret[n].edgect = edgeix;
+				
+				
 			}else{
 				// First line
 				if(0){
@@ -77,7 +131,13 @@ Node* parse(char* fname, int* vct){
 				if(buffer[ixs[i]+2] != 'f') goto fail;
 				if(buffer[ixs[i]+3] != ' ') goto fail;
 				printf("Header pass!\n");
-				*vct = 0;
+				int ix  = ixs[i]+4;
+				int end = (i+1 >= lnct)? fsize : ixs[i+1];
+				skipWhite(buffer, &ix, end);
+				int n   = parseInt(buffer, &ix, end);
+				printf("VERTS=%i\n", n);
+				Node* ret = malloc(sizeof(Node) * n);
+				*vct = n;
 			}
 		}
 	}
