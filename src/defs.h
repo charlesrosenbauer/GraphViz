@@ -31,6 +31,7 @@ Vec4 warp(Vec4);
 void normalize  (Vec4*, int);
 void drawVecs   (uint32_t*, Vec4*, int);
 void projectVecs(Vec4*, int*, int*, int);
+void drawLine   (uint32_t*, int, int, int, int);
 void drawGraph  (uint32_t*, Vec4*, int*, int*, Node*, int, int);
 
 #endif

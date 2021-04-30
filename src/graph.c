@@ -119,6 +119,16 @@ void normalize(Vec4* vs, int ct){
 
 
 void drawLine(uint32_t* ps, int x0, int y0, int x1, int y1){
+	if(x0 > x1){
+		int t = x0;
+		x0 = x1;
+		x1 = t;
+	}
+	if(y0 > y1){
+		int t = y0;
+		y0 = y1;
+		y1 = t;
+	}
 	int dx, dy;
 	int temp, x, y;
 	dx = x1 - x0;
@@ -126,6 +136,7 @@ void drawLine(uint32_t* ps, int x0, int y0, int x1, int y1){
 	x = x0;
 	y = y0;
 	temp = 2 * dy - dx;
+	//printf(">%i %i\n", x, x1);
 	while(x < x1){
 		if(temp < 0){
 			temp = temp + 2 * dy;

@@ -61,6 +61,7 @@ int main(int argc, char** argv){
 	int* xs = malloc(sizeof(int) * vct);
 	int* ys = malloc(sizeof(int) * vct);
 	
+	int x = 0, y = 0;
 	int cont = 1;
 	while(cont){
 		SDL_FillRect(screen, 0, 0);
@@ -69,9 +70,9 @@ int main(int argc, char** argv){
 		normalize(vs, vct);
 		//drawVecs(screen->pixels, vs, vct);
 		
-		drawGraph(screen->pixels, vs, xs, ys, ns, vct, 0);
 		
-		//drawLine(screen->pixels, 0, 0, 511, 255);
+		
+		drawGraph(screen->pixels, vs, xs, ys, ns, vct, 0);
 		
 		SDL_Event e;
 		while(SDL_PollEvent(&e)){
