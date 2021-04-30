@@ -28,8 +28,8 @@ void loadFile(char* fname, uint8_t** buffer, int* fsize){
 void skipWhite(uint8_t* buffer, int* ix, int end){
 	for(int i = *ix; i < end; i++){
 		char c = buffer[i];
-		if((c != ' ') || (c != '\t')) break;
 		*ix = i;
+		if((c != ' ') || (c != '\t')) break;
 	}
 }
 
@@ -66,7 +66,7 @@ Node* parse(char* fname, int* vct){
 		}
 		lnct = 1;
 		lnix = 0;
-		ixs  = malloc(sizeof(int) * (lnct+1));
+		ixs  = malloc(sizeof(int) * (lnct+5));
 		for(int i = 0; i < lnct; i++) ixs[i] = 0;
 		for(int i = 0; i < fsize; i++){
 			if(buffer[i] == '\n'){
@@ -97,24 +97,27 @@ Node* parse(char* fname, int* vct){
 				int init = ix;
 				int end  = (i+1 >= lnct)? fsize : ixs[i+1];
 				int n    = parseInt(buffer, &ix, end);
-				if (n ==    0) goto failLine;
-				if (n >= *vct) goto failLine;
+				if (n ==   0) goto failLine;
+				if (n > *vct) goto failLine;
 				skipWhite(buffer, &ix, end);
 				if(buffer[ix+2] != ':') goto failLine;
 				ix += 1;
 				skipWhite(buffer, &ix, end);
 				int last = ix-1;
-				ret[n].edges = malloc(sizeof(int) * ((end-ix) / 2));
+				ret[n].edges = malloc(sizeof(int) * (end-ix));
 				
 				int edgeix = 0;
 				for(int j  = ix; j < end; j++){
 					last   = ix;
-					ret[n].edges[edgeix] = parseInt(buffer, &j, end);
-					printf("%i\n", ret[n].edges[edgeix]);
+					int v  = parseInt(buffer, &j, end);
+					if(v == 0) continue;
+					ret[n-1].edges[edgeix] = v;
 					edgeix++;
 					skipWhite(buffer, &j, end);
 				}
-				ret[n].edgect = edgeix;
+				for(int k = 0; k < edgeix; k++) printf("%i ", ret[n-1].edges[k]);
+				printf("\n");
+				ret[n-1].edgect = edgeix;
 				
 				
 			}else{
@@ -136,7 +139,8 @@ Node* parse(char* fname, int* vct){
 				skipWhite(buffer, &ix, end);
 				int n   = parseInt(buffer, &ix, end);
 				printf("VERTS=%i\n", n);
-				Node* ret = malloc(sizeof(Node) * n);
+				
+				ret = malloc(sizeof(Node) * n);
 				*vct = n;
 			}
 		}
