@@ -142,6 +142,20 @@ void drawLine(uint32_t* ps, int x0, int y0, int x1, int y1){
 }
 
 
+void drawDot(uint32_t* ps, uint32_t color, int x, int y){
+	for(int i = -2; i < 2; i++){
+		for(int j = -2; j < 2; j++){
+			int x_ = x + j;
+			int y_ = y + i;
+			if((y < 0) || (y > 511)) continue;
+			if((x < 0) || (x > 511)) break;
+			int p = (512 * y_) + x_;
+			ps[p] = color;
+		}
+	}
+}
+
+
 void drawGraph(uint32_t* ps, Vec4* vs, int* xs, int* ys, Node* ns, int ct, int isDirected){
 	float zpos = 1.5;
 	// Project the points. Maybe this should be in a different function
@@ -155,6 +169,7 @@ void drawGraph(uint32_t* ps, Vec4* vs, int* xs, int* ys, Node* ns, int ct, int i
 	for(int i = 0; i < ct; i++){
 		int x = xs[i];
 		int y = ys[i];
+		drawDot(ps, 0xffff0000, x, y);
 		for(int j  = 0; j < ns[i].edgect; j++){
 			int v  = ns[i].edges[j];
 			//if(!isDirected && (v <= i)) continue;
