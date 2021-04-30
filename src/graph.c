@@ -1,4 +1,5 @@
 #include "math.h"
+#include "stdio.h"
 
 #include "defs.h"
 
@@ -47,6 +48,10 @@ Vec4 dotV4(Vec4 a, Vec4 b){
 Vec4 warp(Vec4 a){
 	a = dotV4(a, addV4(a, (Vec4){0.0, 0.2, 0.3, 0.1}));
 	a = dotV4(a, addV4(a, (Vec4){0.0, 0.3, 0.1, 0.2}));
+	a.w = (a.w > 1.0)? 1.0 : (a.w < -1.0)? -1.0 : a.w;
+	a.x = (a.x > 1.0)? 1.0 : (a.x < -1.0)? -1.0 : a.x;
+	a.y = (a.y > 1.0)? 1.0 : (a.y < -1.0)? -1.0 : a.y;
+	a.z = (a.z > 1.0)? 1.0 : (a.z < -1.0)? -1.0 : a.z;
 	return a;
 }
 
@@ -57,9 +62,10 @@ float normal(Vec4 a){
 
 
 void drawVecs(uint32_t* ps, Vec4* vs, int ct){
+	float zpos = 1.5;
 	for(int i = 0; i < ct; i++){
-		int x = ((vs[i].x / vs[i].z) * 256) + 256;
-		int y = ((vs[i].y / vs[i].z) * 256) + 256;
+		int x = ((vs[i].x / (vs[i].z - zpos)) * 256) + 256;
+		int y = ((vs[i].y / (vs[i].z - zpos)) * 256) + 256;
 		if((x < 0) || (x > 511)) continue;
 		if((y < 0) || (y > 511)) continue;
 		ps[(y * 512) + x] = 0xffffffff;
@@ -68,9 +74,10 @@ void drawVecs(uint32_t* ps, Vec4* vs, int ct){
 
 
 void projectVecs(Vec4* vs, int* xs, int* ys, int ct){
+	float zpos = 1.5;
 	for(int i = 0; i < ct; i++){
-		xs[i] = ((vs[i].x / vs[i].z) * 256) + 256;
-		ys[i] = ((vs[i].y / vs[i].z) * 256) + 256;
+		xs[i] = ((vs[i].x / (vs[i].z - zpos)) * 256) + 256;
+		ys[i] = ((vs[i].y / (vs[i].z - zpos)) * 256) + 256;
 	}
 }
 
@@ -92,15 +99,18 @@ Vec4 minV4(Vec4 a, Vec4 b){
 	return ret;
 }
 
+
 void normalize(Vec4* vs, int ct){
 	if(ct < 1) return;
 	Vec4 max = vs[0], min = vs[0];
-	for(int i = 0; i < ct; i++){
+	for(int i = 1; i < ct; i++){
 		max = maxV4(max, vs[i]);
 		min = minV4(min, vs[i]);
 	}
 	Vec4 center = scaleV4(addV4(max, min), 0.5);
-	float scale = normal (subV4(max, center));
+	float scale = 1.0 / normal (subV4(max, center));
+	//printf("SCALE=%f\n", scale);
+	//printf("CENTER=%f %f %f %f\n", center.w, center.x, center.y, center.z);
 	for(int i = 0; i < ct; i++)
 		vs[i] = scaleV4(subV4(vs[i], center), scale);
 }

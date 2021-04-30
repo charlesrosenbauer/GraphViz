@@ -15,6 +15,15 @@ float rflt(){
 	return (((float)ret) / 128.0) - 1.0;
 }
 
+void move(Vec4* vs, int vct, float scale){
+	for(int i = 0; i < vct; i++){
+		vs[i].x += rflt() * scale;
+		vs[i].y += rflt() * scale;
+		vs[i].z += rflt() * scale;
+	}
+	normalize(vs, vct);
+} 
+
 
 void drawLine(uint32_t* ps, int x0, int y0, int x1, int y1){
 	float dx = x0 - x1;
@@ -73,32 +82,27 @@ int main(int argc, char** argv){
 		vs[i].w = 0.0;
 		vs[i].x = rflt();
 		vs[i].y = rflt();
-		vs[i].z = rflt() - 2.5;
+		vs[i].z = rflt();
 	}
+	
+	normalize(vs, 2048);
 	
 	
 	//int vct  = -1;
 	//Node* ns = parse(argv[1], &vct);
 	
-	int cont = 5;
+	int cont = 1;
 	while(cont){
 		SDL_FillRect(screen, 0, 0);
-		drawVecs(screen->pixels, vs, 2048);
 		
-		if(cont == 4){
-			for(int i = 0; i < 2048; i++) vs[i] = warp(vs[i]);
-			cont--;
-		}
-		if(cont == 2){
-			normalize(vs, 2048);
-			cont--;
-		}
+		drawVecs(screen->pixels, vs, 2048);
+		move(vs, 2048, 0.01);
 		
 		//drawLine(screen->pixels, 0, 0, 511, 255);
 		
 		SDL_Event e;
 		while(SDL_PollEvent(&e)){
-			if(e.type == SDL_QUIT) cont--;
+			if(e.type == SDL_QUIT) cont = 0;
 		}
 		SDL_Flip (screen);
 		SDL_Delay(10);
