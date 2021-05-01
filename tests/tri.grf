@@ -1,0 +1,7 @@
+# This is a triangle graph
+grf 3
+# This is the triangle
+1 : 2 3
+2 : 1 3
+3 : 1 2
+
