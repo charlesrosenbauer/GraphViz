@@ -32,7 +32,9 @@ Vec4  warp(Vec4);
 void  normalize  (Vec4*, int);
 void  move       (Vec4*, int, float);
 
-// Optimization
+// Optimization and Physics
+void  push       (Vec4*, Vec4*, Vec4*, float, int);
+void  spring     (Vec4*, Vec4*, Vec4*, Node*, float, float, int);
 void  optimize   (Vec4*, Node*, float, int);
 
 // Rendering

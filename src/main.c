@@ -21,12 +21,13 @@ int main(int argc, char** argv){
 		printf("\n");
 	}
 		
-	Vec4* vs = malloc(sizeof(Vec4) * vct);
+	Vec4* vs  = malloc(sizeof(Vec4) * vct);
+	Vec4* vvs = malloc(sizeof(Vec4) * vct);
+	Vec4* avs = malloc(sizeof(Vec4) * vct);
 	for(int i = 0; i < vct; i++){
-		vs[i].w = 0.0;
-		vs[i].x = rflt();
-		vs[i].y = rflt();
-		vs[i].z = rflt();
+		vs [i] = (Vec4){0, rflt(), rflt(), rflt()};
+		vvs[i] = (Vec4){0,      0,      0,      0};
+		avs[i] = (Vec4){0,      0,      0,      0};
 	}
 	
 	normalize(vs, vct);
@@ -39,7 +40,9 @@ int main(int argc, char** argv){
 	while(cont){
 		SDL_FillRect(screen, 0, 0);
 		
-		optimize(vs, ns, 0.01, vct);
+		spring   (vs, vvs, avs, ns, 0.7, 0.1, vct);
+		push     (vs, vvs, avs, 0.1, vct);
+		normalize(vs, vct);
 		
 		drawGraph(screen->pixels, vs, xs, ys, ns, vct, 0);
 		

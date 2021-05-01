@@ -132,6 +132,11 @@ void move(Vec4* vs, int vct, float scale){
 	normalize(vs, vct);
 }
 
+void push(Vec4* vs, Vec4* vvs, Vec4* avs, float t, int vct){
+	for(int i = 0; i < vct; i++)  vs[i] = addV4( vs[i], scaleV4(vvs[i], t));
+	for(int i = 0; i < vct; i++) vvs[i] = addV4(vvs[i], scaleV4(avs[i], t));
+}
+
 
 Vec4 center(Vec4* vs, int ct){
 	if(ct == 1) return vs[0];
@@ -141,6 +146,20 @@ Vec4 center(Vec4* vs, int ct){
 	return scaleV4(sum, 1.0 / ((float)ct));
 }
 
+
+void spring(Vec4* ps, Vec4* vs, Vec4* as, Node* ns, float k, float l, int vct){
+	for(int i = 0; i < vct; i++){
+		Vec4 pos = ps[i];
+		for(int j = 0; j < ns[i].edgect; j++){
+			int   n = ns[i].edges[j];
+			float d = sqrt(distSqr(pos, ps[n]));
+			float f = k * (d - l);
+			Vec4 fv = scaleV4(subV4(pos, as[i]), f);
+			as[i]   = addV4(as[i], fv);
+			as[n]   = subV4(as[n], fv);
+		}
+	}
+}
 
 
 void optimize(Vec4* vs, Node* ns, float heat, int vct){
