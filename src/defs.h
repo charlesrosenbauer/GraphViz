@@ -26,15 +26,19 @@ Vec4  subV4(Vec4, Vec4);
 Vec4  scaleV4(Vec4, float);
 Vec4  mulV4(Vec4, Vec4);
 float dotV4(Vec4, Vec4);
+float length(Vec4);
 
 Vec4  warp(Vec4);
 
 void  normalize  (Vec4*, int);
+void  recenter   (Vec4*, int);
 void  move       (Vec4*, int, float);
 
 // Optimization and Physics
 void  push       (Vec4*, Vec4*, Vec4*, float, int);
-void  spring     (Vec4*, Vec4*, Vec4*, Node*, float, float, int);
+void  spring     (Vec4*, Vec4*, Node*, float, float, int);
+void  friction   (Vec4*, float, int);
+void  expand     (Vec4*, Vec4*, float, int);
 void  optimize   (Vec4*, Node*, float, int);
 
 // Rendering

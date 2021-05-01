@@ -13,6 +13,10 @@ float distSqr(Vec4 a, Vec4 b){
 	return (dw * dw) + (dx * dx) + (dy * dy) + (dz * dz);
 }
 
+float length(Vec4 v){
+	return sqrt((v.w * v.w) + (v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+}
+
 Vec4 addV4(Vec4 a, Vec4 b){
 	a.w += b.w;
 	a.x += b.x;
@@ -43,6 +47,10 @@ Vec4 mulV4(Vec4 a, Vec4 b){
 	a.y *= b.y;
 	a.z *= b.z;
 	return a;
+}
+
+float dist(Vec4 a, Vec4 b){
+	return length(subV4(a, b));
 }
 
 float dotV4(Vec4 a, Vec4 b){
@@ -147,17 +155,38 @@ Vec4 center(Vec4* vs, int ct){
 }
 
 
-void spring(Vec4* ps, Vec4* vs, Vec4* as, Node* ns, float k, float l, int vct){
+void recenter(Vec4* vs, int ct){
+	Vec4 cnt = center(vs, ct);
+	for(int i = 0; i < ct; i++)
+		vs[i] = subV4(vs[i], cnt);
+}
+
+
+void friction(Vec4* as, float f, int vct){
+	for(int i = 0; i < vct; i++)
+		as[i] = scaleV4(as[i], (1.0 - f));
+}
+
+void spring(Vec4* ps, Vec4* as, Node* ns, float k, float l, int vct){
 	for(int i = 0; i < vct; i++){
 		Vec4 pos = ps[i];
 		for(int j = 0; j < ns[i].edgect; j++){
 			int   n = ns[i].edges[j];
-			float d = sqrt(distSqr(pos, ps[n]));
-			float f = k * (d - l);
-			Vec4 fv = scaleV4(subV4(pos, as[i]), f);
+			float d = dist(pos, ps[n]);
+			float f = k * (l - d);
+			Vec4 dv = subV4(pos, ps[n]);
+			Vec4 fv = scaleV4(dv, f);
 			as[i]   = addV4(as[i], fv);
 			as[n]   = subV4(as[n], fv);
 		}
+	}
+}
+
+void expand(Vec4* ps, Vec4* as, float f, int vct){
+	Vec4  cnt = center(ps, vct);
+	for(int i = 0; i < vct; i++){
+		float d = sqrt (distSqr(cnt, ps[i]));
+		as[i]   = addV4(as[i], scaleV4(cnt, f / (1.0 - d)));
 	}
 }
 
@@ -242,8 +271,8 @@ void drawDot(uint32_t* ps, uint32_t color, int x, int y){
 		for(int j = -2; j < 2; j++){
 			int x_ = x + j;
 			int y_ = y + i;
-			if((y < 0) || (y > 511)) continue;
-			if((x < 0) || (x > 511)) break;
+			if((y_ < 0) || (y_ > 511)) continue;
+			if((x_ < 0) || (x_ > 511)) continue;
 			int p = (512 * y_) + x_;
 			ps[p] = color;
 		}
@@ -264,7 +293,6 @@ void drawGraph(uint32_t* ps, Vec4* vs, int* xs, int* ys, Node* ns, int ct, int i
 	for(int i = 0; i < ct; i++){
 		int x = xs[i];
 		int y = ys[i];
-		drawDot(ps, 0xffff0000, x, y);
 		for(int j  = 0; j < ns[i].edgect; j++){
 			int v  = ns[i].edges[j];
 			if(!isDirected && (v <= i)) continue;
@@ -274,6 +302,8 @@ void drawGraph(uint32_t* ps, Vec4* vs, int* xs, int* ys, Node* ns, int ct, int i
 			drawLine(ps, x, y, x_, y_);
 		}
 	}
+	for(int i = 0; i < ct; i++)
+		drawDot(ps, 0xffff0000, xs[i], ys[i]);
 	//printf("\n");
 }
 

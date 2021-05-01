@@ -40,12 +40,16 @@ int main(int argc, char** argv){
 	while(cont){
 		SDL_FillRect(screen, 0, 0);
 		
-		spring   (vs, vvs, avs, ns, 0.7, 0.1, vct);
+		for(int i = 0; i < vct; i++) avs[i] = (Vec4){0, 0, 0, 0};
+		spring   (vs, avs, ns, 0.1, 0.5, vct);
+		friction (vvs, 0.03, vct);
+		expand   (vs, avs, 0.3, vct);
 		push     (vs, vvs, avs, 0.1, vct);
-		normalize(vs, vct);
+		recenter (vs, vct);
+		//normalize(vs, vct);
 		
 		drawGraph(screen->pixels, vs, xs, ys, ns, vct, 0);
-		
+
 		SDL_Event e;
 		while(SDL_PollEvent(&e)){
 			if(e.type == SDL_QUIT) cont = 0;

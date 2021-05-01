@@ -124,8 +124,8 @@ Node* parse(char* fname, int* vct){
 				if(0){
 					fail:
 						printf("Invalid file header\n");
-						free(buffer);
-						free(ixs);
+						//free(buffer);
+						//free(ixs);
 						return NULL;
 				}
 				if(buffer[ixs[i]  ] != 'g') goto fail;
@@ -143,8 +143,8 @@ Node* parse(char* fname, int* vct){
 		}
 	}
 	
-	free(buffer);
-	free(ixs);
+	//free(buffer);
+	//free(ixs);
 	return &ret[1];
 }
 
