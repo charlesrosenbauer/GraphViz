@@ -37,7 +37,7 @@ Vec4 scaleV4(Vec4 a, float n){
 	return a;
 }
 
-Vec4 dotV4(Vec4 a, Vec4 b){
+Vec4 mulV4(Vec4 a, Vec4 b){
 	a.w *= b.w;
 	a.x *= b.x;
 	a.y *= b.y;
@@ -45,9 +45,17 @@ Vec4 dotV4(Vec4 a, Vec4 b){
 	return a;
 }
 
+float dotV4(Vec4 a, Vec4 b){
+	a.w *= b.w;
+	a.x *= b.x;
+	a.y *= b.y;
+	a.z *= b.z;
+	return a.w + a.x + a.y + a.z;
+}
+
 Vec4 warp(Vec4 a){
-	a = dotV4(a, addV4(a, (Vec4){0.0, 0.2, 0.3, 0.1}));
-	a = dotV4(a, addV4(a, (Vec4){0.0, 0.3, 0.1, 0.2}));
+	a = mulV4(a, addV4(a, (Vec4){0.0, 0.2, 0.3, 0.1}));
+	a = mulV4(a, addV4(a, (Vec4){0.0, 0.3, 0.1, 0.2}));
 	a.w = (a.w > 1.0)? 1.0 : (a.w < -1.0)? -1.0 : a.w;
 	a.x = (a.x > 1.0)? 1.0 : (a.x < -1.0)? -1.0 : a.x;
 	a.y = (a.y > 1.0)? 1.0 : (a.y < -1.0)? -1.0 : a.y;
@@ -114,6 +122,63 @@ void normalize(Vec4* vs, int ct){
 	for(int i = 0; i < ct; i++)
 		vs[i] = scaleV4(subV4(vs[i], center), scale);
 }
+
+void move(Vec4* vs, int vct, float scale){
+	for(int i = 0; i < vct; i++){
+		vs[i].x += rflt() * scale;
+		vs[i].y += rflt() * scale;
+		vs[i].z += rflt() * scale;
+	}
+	normalize(vs, vct);
+}
+
+
+Vec4 center(Vec4* vs, int ct){
+	if(ct == 1) return vs[0];
+	Vec4 sum = vs[0];
+	for(int i = 1; i < ct; i++)
+		sum = addV4(sum, vs[i]);
+	return scaleV4(sum, 1.0 / ((float)ct));
+}
+
+
+
+void optimize(Vec4* vs, Node* ns, float heat, int vct){
+	Vec4 cnt = center(vs, vct);
+
+	for(int i = 0; i < vct; i++){
+		Vec4 best  = vs[i];
+		float err  = 1e10;
+		int rounds = 8;
+		for(int k  = 0; k < rounds; k++){
+			Vec4 test = vs[i];
+			if(k != 0){
+				test.x = vs[i].x + rflt() * heat;
+				test.y = vs[i].y + rflt() * heat;
+				test.z = vs[i].z + rflt() * heat;
+			}
+			
+			float dev = 0;
+			if(ns[i].edgect > 0){
+				for(int j = 0; j < ns[i].edgect; j++)
+					dev += distSqr(vs[i], vs[j]);
+				dev /= ns[i].edgect;
+			}
+			
+			float loc = dev - (0.3 * distSqr(test, cnt));
+			printf("%f\n", loc);
+			if(loc < err){
+				best = test;
+				err  = loc;
+			}
+		}
+		vs[i] = best;
+	}
+	normalize(vs, vct);
+}
+
+
+
 
 int abs(int x){
 	return (x < 0)? -x : x;
@@ -183,7 +248,7 @@ void drawGraph(uint32_t* ps, Vec4* vs, int* xs, int* ys, Node* ns, int ct, int i
 		drawDot(ps, 0xffff0000, x, y);
 		for(int j  = 0; j < ns[i].edgect; j++){
 			int v  = ns[i].edges[j];
-			//if(!isDirected && (v <= i)) continue;
+			if(!isDirected && (v <= i)) continue;
 			int x_ = xs[v];
 			int y_ = ys[v];
 			//printf("L%i %i %i %i\n", x_, y_, x, y);
