@@ -115,40 +115,40 @@ void normalize(Vec4* vs, int ct){
 		vs[i] = scaleV4(subV4(vs[i], center), scale);
 }
 
-
+int abs(int x){
+	return (x < 0)? -x : x;
+}
 
 
 void drawLine(uint32_t* ps, int x0, int y0, int x1, int y1){
-	if(x0 > x1){
-		int t = x0;
-		x0 = x1;
-		x1 = t;
-	}
-	if(y0 > y1){
-		int t = y0;
-		y0 = y1;
-		y1 = t;
-	}
-	int dx, dy;
-	int temp, x, y;
-	dx = x1 - x0;
-	dy = y1 - y0;
-	x = x0;
-	y = y0;
-	temp = 2 * dy - dx;
-	//printf(">%i %i\n", x, x1);
-	while(x < x1){
-		if(temp < 0){
-			temp = temp + 2 * dy;
-		}else{
-			y = y + 1;
-			temp = temp + 2 * dy - 2 * dx;
+	int dx  = x1 - x0;
+	int dy  = y1 - y0;
+	float m = ((float)abs(dy)) / ((float)dx);
+	
+	int   x = x1;
+	int   y = y1;
+	float c = 0.0;
+	if(abs(dx) > abs(dy)){	// from x1 -> x0
+		int  ix = (dx < 0)? -1 : 1;
+		float c = 0.0;
+		if((dx ^ dy) > 0) m = -m;
+		for(int i = 0; i < abs(dx); i++){
+			x -= ix;
+			c -= m;
+			y  = y1 - c;
+			int p = (y * 512) + x;
+			if(!((x < 0) || (x > 511) || (y < 0) || (y > 511))) ps[p] = 0xffffffff;
 		}
-		int p = (y * 512) + x;
-		x++;
-		if((x < 0) || (x > 511)) continue;
-		if((y < 0) || (y > 511)) continue;
-		ps[p] = 0xffffff;
+	}else{					// from y1 -> y0
+		m = 1.0 / m;
+		int iy = (dy < 0)? -1 : 1;
+		for(int i = 0; i < abs(dy); i++){
+			y -= iy;
+			c += m;
+			x  = x1 - c;
+			int p = (y * 512) + x;
+			if(!((x < 0) || (x > 511) || (y < 0) || (y > 511))) ps[p] = 0xffffffff;
+		}
 	}
 }
 
