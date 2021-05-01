@@ -43,7 +43,7 @@ int main(int argc, char** argv){
 		for(int i = 0; i < vct; i++) avs[i] = (Vec4){0, 0, 0, 0};
 		spring   (vs, avs, ns, 0.1, 0.5, vct);
 		friction (vvs, 0.03, vct);
-		expand   (vs, avs, 0.3, vct);
+		expand   (vs, avs, 0.9, vct);
 		push     (vs, vvs, avs, 0.1, vct);
 		recenter (vs, vct);
 		//normalize(vs, vct);
@@ -52,7 +52,8 @@ int main(int argc, char** argv){
 
 		SDL_Event e;
 		while(SDL_PollEvent(&e)){
-			if(e.type == SDL_QUIT) cont = 0;
+			if (e.type == SDL_QUIT) cont = 0;
+			if((e.type == SDL_KEYDOWN) && (e.key.keysym.sym == SDLK_SPACE)) move(vs, vct, 0.01);
 		}
 		SDL_Flip (screen);
 		SDL_Delay(10);
